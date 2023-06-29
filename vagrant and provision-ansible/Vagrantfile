@@ -1,0 +1,40 @@
+nodes = [
+{ :hostname => 'ubuntu1', :ip => '10.168.1.50', :vmname => 'ubuntu1', :memory => 1024, :cpu =>1, :boxname => "ubuntu/trusty64" },
+{ :hostname => 'ubuntu2', :ip => '10.168.1.51', :vmname => 'ubuntu2', :memory => 1024, :cpu =>1, :boxname => "ubuntu/trusty64" },
+{ :hostname => 'ubuntu3', :ip => '10.168.1.52', :vmname => 'ubuntu3', :memory => 1024, :cpu =>1, :boxname => "ubuntu/trusty64" },
+
+]
+
+Vagrant.configure("2") do |config|
+	nodes.each do |node|
+		config.vm.box_check_update = false 
+		config.vm.define node[:hostname] do |nod|
+			nod.vm.box = node[:boxname]
+			nod.vm.hostname = node[:hostname]
+			nod.vm.network :private_network, ip: node[:ip]
+			nod.vm.provider :virtualbox do |vb|
+				config.ssh.insert_key = false
+				vb.memory = node[:memory]
+				vb.cpus = node[:cpu]
+				vb.name = node[:vmname]
+				
+
+			end
+
+		end
+	end 
+	config.vm.define "ansible" do |ans|
+		ans.vm.box = "ubuntu/trusty64" 
+	ans.vm.network "private_network",
+	ip: "10.168.1.49" 
+	ans.vm.hostname = "ansible"
+	ans.ssh.password = "vagrant"
+	ans.vm.provider "virtualbox" do |vb|
+	vb.name = "ansible"
+	vb.memory = "2048"
+	vb.cpus = "2"
+	ans.vm.provision "shell", path: "provision.sh"
+	end
+	end
+	end   
+
